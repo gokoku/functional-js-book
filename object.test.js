@@ -19,4 +19,5 @@ const robots = compose(
 
 test('object', () => {
   expect(object.get('HAL9000')(robots)).toBe('2001: a space odessay')
+  expect(object.get('C3PO')(robots)).toBe('star Wars')
 })
