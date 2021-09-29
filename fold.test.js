@@ -39,6 +39,24 @@ const list = {
       cons: (head, tail) =>
         callback(head)(list.foldr(tail)(accumulator)(callback)),
     }),
+  append: (xs) => (ys) =>
+    list.match(xs, {
+      empty: () => ys,
+      cons: (head, tail) => list.cons(head, list.append(tail)(ys)),
+    }),
+  reverse: (alist) =>
+    list.foldr(alist)(list.empty(0))(
+      (item) => (accumulator) =>
+        list.append(accumulator)(list.cons(item, list.empty())),
+    ),
+  find: (alist) => (predicate) =>
+    list.foldr(alist)(null)((item) => (accumulator) => {
+      if (predicate(item) === true) {
+        return item
+      } else {
+        return accumulator
+      }
+    }),
 }
 
 const numbers = list.cons(1, list.cons(2, list.cons(3, list.empty())))
@@ -105,4 +123,24 @@ test('any with foldr', () => {
   expect(any(boolAllTrue)).toBe(true)
   expect(any(boolOnlyOneFalse)).toBe(true)
   expect(any(boolAllFalse)).toBe(false)
+})
+
+const compose = (f, g) => (arg) => f(g(arg))
+
+test('append', () => {
+  expect(
+    compose(
+      list.toArray,
+      list.append(numbers),
+    )(list.cons(4, list.cons(5, list.empty()))),
+  ).toStrictEqual([1, 2, 3, 4, 5])
+})
+
+test('reverse', () => {
+  expect(compose(list.toArray, list.reverse)(numbers)).toStrictEqual([3, 2, 1])
+})
+
+test('find', () => {
+  expect(list.find(numbers)((item) => item >= 2)).toBe(2)
+  expect(list.find(numbers)((item) => item > 2)).toBe(3)
 })
